@@ -1,10 +1,7 @@
-# coding = utf-8
-import calendar
 import random
 import time
+import os
 import unittest
-import selenium
-import urllib
 import requests
 from selenium import webdriver
 
@@ -28,12 +25,14 @@ class NYSE(unittest.TestCase):
         time.sleep(random.randint(1, 5))
 
         # Getting all the historical data in 2019\
+        if not os.path.isdir("./pdf_result"):
+            os.makedirs("./pdf_result")
         mon = []
         for i in range(1, 13):
             url = "https://www.nyse.com/publicdocs/nyse/data/Monthly_Consolidated_Volume_by_Symbol_20191{0}.pdf".format(
                 str(i))
             r = requests.get(url, stream=True)
-            file_name = '2019-' + str(i) + '.pdf'
+            file_name = "./pdf_result" + '2019-' + str(i) + '.pdf'
             print("Downloading file:%s" % file_name)
             with open(file_name, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024 * 1024):

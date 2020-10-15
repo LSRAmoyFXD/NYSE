@@ -1,39 +1,48 @@
-# coding = utf-8
-import calendar
 import random
 import time
 import unittest
-import selenium
-import urllib
+import os
 import requests
 from selenium import webdriver
+from config import ConfigClass
 
 
-class NYSE(unittest.TestCase):
+
+class WebTest(unittest.TestCase):
+
+    os_info = os.uname()
+    system = getattr(os_info, "sysname")
+    # In current repo we only have driver for chrome 86
+    if system == 'Darwin':
+        driver = './driver/mac/chromedriver'
+    elif system == 'Ubuntu':
+        driver = './driver/lin/chromedriver.exe'
+    else:
+        driver = './driver/win/chromedriver'
+
     def setUp(self):
-        path = 'C:/Users/lsram/Downloads/chromedriver_win32/chromedriver'
+        path = self.driver
         self.driver = webdriver.Chrome(path)
 
     def tearDown(self):
         self.driver.close()
 
     def test_1(self):
-        self.driver.get("https://www.nyse.com/index")
+        self.driver.get(ConfigClass.base_url)
         time.sleep(random.randint(1, 5))
-        self.driver.find_element_by_xpath(
-            '//*[@id="content-c37580c1-3072-4b0a-82a2-1fbe77004d04"]/nav/ul/li[4]').click()
+        self.driver.find_element_by_xpath(ConfigClass.xpath1).click()
         time.sleep(random.randint(1, 5))
-        self.driver.find_element_by_xpath(
-            '//*[@id="content-c37580c1-3072-4b0a-82a2-1fbe77004d04"]/nav/ul/li[4]/div/div[2]/ul/li[1]/a').click()
+        self.driver.find_element_by_xpath(ConfigClass.xpath2).click()
         time.sleep(random.randint(1, 5))
 
         # Getting all the historical data in 2019\
-        mon = []
+        if not os.path.isdir("./pdf_result"):
+            os.makedirs("./pdf_result")
+
         for i in range(1, 13):
-            url = "https://www.nyse.com/publicdocs/nyse/data/Monthly_Consolidated_Volume_by_Symbol_20191{0}.pdf".format(
-                str(i))
+            url = ConfigClass.request_url + "/Monthly_Consolidated_Volume_by_Symbol_20191{0}.pdf".format(str(i))
             r = requests.get(url, stream=True)
-            file_name = '2019-' + str(i) + '.pdf'
+            file_name = "./pdf_result/" + '2019-' + str(i) + '.pdf'
             print("Downloading file:%s" % file_name)
             with open(file_name, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024 * 1024):
