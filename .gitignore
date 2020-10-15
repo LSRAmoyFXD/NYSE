@@ -1,6 +1,7 @@
 # env
 venv
 
-# test
-*.coverage
-*.pytest_cache
+
+.coverage
+.pytest_cache
+__pycache__
